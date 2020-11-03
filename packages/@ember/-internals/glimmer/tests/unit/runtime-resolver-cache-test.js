@@ -1,3 +1,4 @@
+import { ENV } from '@ember/-internals/environment';
 import {
   RenderingTestCase,
   moduleFor,
@@ -38,6 +39,8 @@ moduleFor(
           helperDefinitionCount: 1,
           // from this.render
           templateCacheMisses: 1,
+          // from debugRenderTree
+          templateCacheHits: ENV._DEBUG_RENDER_TREE ? 1 : 0,
         },
         'calculate foo-bar helper only'
       );
@@ -88,6 +91,8 @@ moduleFor(
           componentDefinitionCount: 1,
           // 1 from this.render, 1 from component-one
           templateCacheMisses: 2,
+          // debugRenderTree
+          templateCacheHits: ENV._DEBUG_RENDER_TREE ? 1 : 0,
         },
         'test case component and component-one no change'
       );
@@ -155,6 +160,7 @@ moduleFor(
         {
           componentDefinitionCount: 1,
           templateCacheMisses: 2,
+          templateCacheHits: ENV._DEBUG_RENDER_TREE ? 1 : 0,
         },
         'test case component and component-one no change'
       );
@@ -167,6 +173,7 @@ moduleFor(
         {
           templateCacheMisses: 1,
           componentDefinitionCount: 1,
+          templateCacheHits: ENV._DEBUG_RENDER_TREE ? 1 : 0,
         },
         'component-two first render misses template cache'
       );
@@ -183,7 +190,7 @@ moduleFor(
       this.assertText('Two');
       this.expectCacheChanges(
         {
-          templateCacheHits: 1,
+          templateCacheHits: ENV._DEBUG_RENDER_TREE ? 2 : 1,
         },
         'toggle back to component-two hits template cache'
       );
@@ -195,7 +202,7 @@ moduleFor(
         this.assertText('TwoOne');
         // roots have different capabilities so this will hit
         this.expectCacheChanges(
-          { templateCacheHits: 1 },
+          { templateCacheHits: ENV._DEBUG_RENDER_TREE ? 2 : 1 },
           'append root with component-one no change'
         );
 
@@ -204,7 +211,10 @@ moduleFor(
         try {
           runAppend(root2);
           this.assertText('TwoOneOne');
-          this.expectCacheChanges({ templateCacheHits: 1 }, 'append another root no change');
+          this.expectCacheChanges(
+            { templateCacheHits: ENV._DEBUG_RENDER_TREE ? 2 : 1 },
+            'append another root no change'
+          );
         } finally {
           runDestroy(root2);
         }
